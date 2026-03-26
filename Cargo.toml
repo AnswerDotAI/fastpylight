@@ -1,0 +1,12 @@
+[package]
+name = "fastpylight"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "fastpylight"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.22", features = ["extension-module"] }
+inkjet = { version = "0.10", features = ["all_languages"] }
