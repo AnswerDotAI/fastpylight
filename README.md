@@ -34,6 +34,12 @@ hl_html = highlight(code=code_block, lang='python')
 
 ```
 
+`hl_html` will contain:
+
+```py
+'<hl-code toks=\'[[1,7,"keyword-control-import"],[8,12,"namespace"],[14,17,"keyword-function"],[18,25,"function"],[25,26,"punctuation-bracket"],[26,27,"punctuation-bracket"],[27,28,"punctuation-delimiter"],[33,38,"function-builtin"],[38,39,"punctuation-bracket"],[39,54,"string"],[54,55,"punctuation-special"],[55,56,"constant-numeric-integer"],[56,57,"string"],[57,58,"operator"],[58,59,"string"],[59,60,"constant-numeric-integer"],[60,61,"punctuation-special"],[61,62,"string"],[62,63,"punctuation-bracket"],[68,72,"namespace"],[72,73,"punctuation-delimiter"],[73,78,"function-method"],[78,79,"punctuation-bracket"],[79,80,"constant-numeric-integer"],[80,81,"punctuation-bracket"],[83,85,"keyword-control-conditional"],[86,96,"string"],[97,99,"operator"],[100,110,"string"],[110,111,"punctuation-delimiter"],[116,123,"function"],[123,124,"punctuation-bracket"],[124,125,"punctuation-bracket"]]\'><pre><code>\nimport time\n\ndef my_func():\n    print(f\'Hello World! {1 * 1}\')\n    time.sleep(4)\n\nif \'__name__\' == \'__main__\':\n    my_func()\n</code></pre></hl-code>'
+```
+
 ### Example Javascript:
 
 ```js
