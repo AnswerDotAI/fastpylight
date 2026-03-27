@@ -55,6 +55,7 @@ class HlCode extends HTMLElement {
         const h=CSS.highlights.get(k)||new Highlight();
         h.add(r); CSS.highlights.set(k,h);
         this._ranges.push([r,k]);
+        this.removeAttribute('toks');
       });
     }, 0);
   }
