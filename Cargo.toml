@@ -9,4 +9,4 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.22", features = ["extension-module"] }
-inkjet = { version = "0.10", features = ["all_languages"] }
+inkjet = { version = "0.11", features = ["all_languages", "theme"] }

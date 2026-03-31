@@ -1,1 +1,1 @@
-from fastpylight._core import tokenize, highlight, highlight_spans, languages
+from fastpylight._core import tokenize, highlight, highlight_spans, languages, theme_css, themes
