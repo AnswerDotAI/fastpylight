@@ -1,31 +1,69 @@
 use inkjet::{Highlighter, Language};
-use inkjet::tree_sitter_highlight::HighlightEvent;
 use inkjet::constants::HIGHLIGHT_NAMES;
 use inkjet::theme::{Theme, vendored, Modifier};
+use tree_sitter_highlight::{HighlightEvent, HighlightConfiguration, Highlighter as TSHighlighter};
+use std::sync::LazyLock;
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
+
+extern "C" { fn tree_sitter_python() -> tree_sitter::Language; }
+
+static PY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let mut c = HighlightConfiguration::new(
+        unsafe { tree_sitter_python() }, "python",
+        include_str!("../queries/python/highlights.scm"),
+        include_str!("../queries/python/injections.scm"),
+        include_str!("../queries/python/locals.scm"),
+    ).expect("Failed to load Python highlight config");
+    c.configure(HIGHLIGHT_NAMES);
+    c
+});
 
 fn parse_lang(lang: &str) -> PyResult<Language> {
     Language::from_token(lang)
         .ok_or_else(|| PyValueError::new_err(format!("Unknown language: {lang}")))
 }
 
-#[pyfunction]
-fn tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
-    let language = parse_lang(lang)?;
-    let mut h = Highlighter::new();
+fn run_highlights<'a>(events: impl Iterator<Item = Result<HighlightEvent, tree_sitter_highlight::Error>>) -> PyResult<Vec<(usize, usize, String)>> {
     let mut toks: Vec<(usize, usize, String)> = Vec::new();
     let mut stack: Vec<&str> = Vec::new();
-    let source = code.to_string();
-    let events = h.highlight_raw(language, &source)
-        .map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
     for event in events {
         let event = event.map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
         match event {
             HighlightEvent::Source { start, end } => {
-                if let Some(&kind) = stack.last() {
-                    toks.push((start, end, kind.to_string()));
-                }
+                if let Some(&kind) = stack.last() { toks.push((start, end, kind.to_string())); }
+            }
+            HighlightEvent::HighlightStart(idx) => {
+                let name = HIGHLIGHT_NAMES.get(idx.0).copied().unwrap_or("unknown");
+                stack.push(name);
+            }
+            HighlightEvent::HighlightEnd => { stack.pop(); }
+        }
+    }
+    Ok(toks)
+}
+
+#[pyfunction]
+fn tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
+    if lang == "python" || lang == "py" {
+        let mut h = TSHighlighter::new();
+        let events = h.highlight(&PY_CONFIG, code.as_bytes(), None, |token| {
+            match Language::from_token(token) { Some(l) => Some(l.config()), None => None }
+        }).map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
+        return run_highlights(events);
+    }
+    let language = parse_lang(lang)?;
+    let mut h = Highlighter::new();
+    let source = code.to_string();
+    let events = h.highlight_raw(language, &source)
+        .map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
+    let mut toks: Vec<(usize, usize, String)> = Vec::new();
+    let mut stack: Vec<&str> = Vec::new();
+    for event in events {
+        let event = event.map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
+        match event {
+            HighlightEvent::Source { start, end } => {
+                if let Some(&kind) = stack.last() { toks.push((start, end, kind.to_string())); }
             }
             HighlightEvent::HighlightStart(idx) => {
                 let name = HIGHLIGHT_NAMES.get(idx.0).copied().unwrap_or("unknown");
