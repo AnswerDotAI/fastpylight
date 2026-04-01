@@ -6,7 +6,20 @@ build-backend = "maturin"
 name = "fastpylight"
 version = "0.1.0"
 description = "Fast syntax highlighting using tree-sitter, powered by Rust"
+license = {text = "MIT OR Apache-2.0"}
 requires-python = ">=3.10"
+readme = "README.md"
+authors = [{name = "Curtis Allan", email = "ca@answer.ai"}]
+maintainers = [{name = "fast.ai", email = "infos@fast.ai"}]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+
+[project.urls]
+Homepage = "https://github.com/AnswerDotAI/fastpylight"
+Repository = "https://github.com/AnswerDotAI/fastpylight"
+Issues = "https://github.com/AnswerDotAI/fastpylight/issues"
 
 [tool.maturin]
 features = ["pyo3/extension-module"]
