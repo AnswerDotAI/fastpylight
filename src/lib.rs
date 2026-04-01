@@ -49,21 +49,21 @@ fn html_escape(s: &str, out: &mut String) {
     }
 }
 
-fn byte_to_char_table(s: &str) -> Vec<usize> {
+fn byte_to_utf16_table(s: &str) -> Vec<usize> {
     let mut table = vec![0usize; s.len() + 1];
-    let mut char_idx = 0usize;
-    for (byte_idx, _) in s.char_indices() {
-        table[byte_idx] = char_idx;
-        char_idx += 1;
+    let mut utf16_idx = 0usize;
+    for (byte_idx, ch) in s.char_indices() {
+        table[byte_idx] = utf16_idx;
+        utf16_idx += ch.len_utf16();
     }
-    table[s.len()] = char_idx;
+    table[s.len()] = utf16_idx;
     table
 }
 
 #[pyfunction]
 fn highlight(code: &str, lang: &str) -> PyResult<String> {
     let toks = tokenize(code, lang)?;
-    let b2c = byte_to_char_table(code);
+    let b2c = byte_to_utf16_table(code);
     let mut toks_json = String::from("[");
     for (i, (start, end, ref kind)) in toks.iter().enumerate() {
         if i > 0 { toks_json.push(','); }
