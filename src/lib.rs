@@ -8,6 +8,17 @@ use pyo3::exceptions::PyValueError;
 
 extern "C" { fn tree_sitter_python() -> tree_sitter::Language; }
 
+fn remap_queries(src: &str) -> String {
+    src.replace("@text.title", "@markup.heading")
+       .replace("@text.literal", "@markup.raw")
+       .replace("@text.emphasis", "@markup.italic")
+       .replace("@text.strong", "@markup.bold")
+       .replace("@text.uri", "@markup.link.url")
+       .replace("@text.reference", "@markup.link.label")
+       .replace("@string.escape", "@constant.character.escape")
+       .replace("@none", "@comment")
+}
+
 static PY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     let mut c = HighlightConfiguration::new(
         unsafe { tree_sitter_python() }, "python",
@@ -15,6 +26,28 @@ static PY_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
         include_str!("../queries/python/injections.scm"),
         include_str!("../queries/python/locals.scm"),
     ).expect("Failed to load Python highlight config");
+    c.configure(HIGHLIGHT_NAMES);
+    c
+});
+
+static MD_BLOCK_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let hl = remap_queries(tree_sitter_md::HIGHLIGHT_QUERY_BLOCK);
+    let inj = tree_sitter_md::INJECTION_QUERY_BLOCK;
+    let mut c = HighlightConfiguration::new(
+        tree_sitter_md::LANGUAGE.into(), "markdown",
+        &hl, inj, "",
+    ).expect("Failed to load Markdown block config");
+    c.configure(HIGHLIGHT_NAMES);
+    c
+});
+
+static MD_INLINE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
+    let hl = remap_queries(tree_sitter_md::HIGHLIGHT_QUERY_INLINE);
+    let inj = tree_sitter_md::INJECTION_QUERY_INLINE;
+    let mut c = HighlightConfiguration::new(
+        tree_sitter_md::INLINE_LANGUAGE.into(), "markdown_inline",
+        &hl, inj, "",
+    ).expect("Failed to load Markdown inline config");
     c.configure(HIGHLIGHT_NAMES);
     c
 });
@@ -51,6 +84,44 @@ fn tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
             match Language::from_token(token) { Some(l) => Some(l.config()), None => None }
         }).map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
         return run_highlights(events);
+    }
+    if lang == "markdown" || lang == "md" {
+        let mut h = TSHighlighter::new();
+        let block_events = h.highlight(&MD_BLOCK_CONFIG, code.as_bytes(), None, |_| None)
+            .map_err(|e| PyValueError::new_err(format!("Highlight error: {e}")))?;
+        let mut toks = run_highlights(block_events)?;
+        let mut parser = tree_sitter::Parser::new();
+        parser.set_language(&tree_sitter_md::LANGUAGE.into()).ok();
+        if let Some(tree) = parser.parse(code, None) {
+            let mut cursor = tree.walk();
+            loop {
+                let node = cursor.node();
+                if node.kind() == "inline" {
+                    let start = node.start_byte();
+                    let end = node.end_byte();
+                    if start < end {
+                        let slice = &code.as_bytes()[start..end];
+                        let mut h2 = TSHighlighter::new();
+                        let events = h2.highlight(&MD_INLINE_CONFIG, slice, None, |t| {
+                            Language::from_token(t).map(|l| l.config())
+                        });
+                        if let Ok(evts) = events {
+                            let collected: Vec<_> = evts.collect();
+                            if let Ok(inline_toks) = run_highlights(collected.into_iter()) {
+                                for (s, e, kind) in inline_toks { toks.push((start + s, start + e, kind)); }
+                            }
+                        }
+                    }
+                }
+                if cursor.goto_first_child() { continue; }
+                while !cursor.goto_next_sibling() {
+                    if !cursor.goto_parent() { break; }
+                }
+                if cursor.node() == tree.root_node() { break; }
+            }
+        }
+        toks.sort_by_key(|(s, _, _)| *s);
+        return Ok(toks);
     }
     let language = parse_lang(lang)?;
     let mut h = Highlighter::new();
@@ -141,18 +212,18 @@ fn highlight_spans(code: &str, lang: &str, class_prefix: Option<&str>) -> PyResu
 
 #[pyfunction]
 fn languages() -> Vec<&'static str> {
-    vec![
+    let all = vec![
         "ada", "asm", "astro", "awk", "bash", "bibtex", "bicep", "blueprint", "c", "capnp",
         "clojure", "c_sharp", "commonlisp", "cpp", "css", "cue", "d", "dart", "diff",
         "dockerfile", "eex", "elisp", "elixir", "elm", "erlang", "forth", "fortran", "gdscript",
         "gleam", "glsl", "go", "haskell", "hcl", "heex", "html", "iex", "ini", "java",
         "javascript", "json", "jsx", "kotlin", "latex", "llvm", "lua", "make", "markdown", "md",
-        "matlab", "meson",
-        "nim", "nix", "objc", "ocaml", "openscad", "pascal", "php", "plaintext", "proto",
-        "python", "r", "racket", "regex", "ruby", "rust", "scala", "scheme", "scss", "sql",
-        "svelte", "swift", "toml", "typescript", "tsx", "vim", "wast", "wat", "x86asm", "wgsl",
-        "yaml", "zig",
-    ]
+        "matlab", "meson", "nim", "nix", "objc", "ocaml", "openscad", "pascal", "php",
+        "plaintext", "proto", "python", "r", "racket", "regex", "ruby", "rust", "scala",
+        "scheme", "scss", "sql", "svelte", "swift", "toml", "typescript", "tsx", "vim", "wast",
+        "wat", "x86asm", "wgsl", "yaml", "zig",
+    ];
+    all.into_iter().filter(|t| matches!(*t, "python" | "py" | "markdown" | "md") || Language::from_token(t).is_some()).collect()
 }
 
 fn lookup_vendored(name: &str) -> PyResult<&'static str> {
