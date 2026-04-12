@@ -69,3 +69,7 @@ jobs:
           subject-path: 'wheels-*/*'
       - uses: astral-sh/setup-uv@v7
       - run: uv publish 'wheels-*/*'
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" wheels-*/* --generate-notes --title "$GITHUB_REF_NAME"
