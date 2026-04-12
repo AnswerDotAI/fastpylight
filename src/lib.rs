@@ -52,6 +52,14 @@ static MD_INLINE_CONFIG: LazyLock<HighlightConfiguration> = LazyLock::new(|| {
     c
 });
 
+fn resolve_alias(lang: &str) -> &str {
+    match lang {
+        "yml" => "yaml",
+        "zsh" => "bash",
+        _ => lang,
+    }
+}
+
 fn parse_lang(lang: &str) -> PyResult<Language> {
     Language::from_token(lang)
         .ok_or_else(|| PyValueError::new_err(format!("Unknown language: {lang}")))
@@ -78,6 +86,7 @@ fn run_highlights<'a>(events: impl Iterator<Item = Result<HighlightEvent, tree_s
 
 #[pyfunction]
 fn tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
+    let lang = resolve_alias(lang);
     if lang == "python" || lang == "py" {
         let mut h = TSHighlighter::new();
         let events = h.highlight(&PY_CONFIG, code.as_bytes(), None, |token| {
@@ -221,9 +230,9 @@ fn languages() -> Vec<&'static str> {
         "matlab", "meson", "nim", "nix", "objc", "ocaml", "openscad", "pascal", "php",
         "plaintext", "proto", "python", "r", "racket", "regex", "ruby", "rust", "scala",
         "scheme", "scss", "sql", "svelte", "swift", "toml", "typescript", "tsx", "vim", "wast",
-        "wat", "x86asm", "wgsl", "yaml", "zig",
+        "wat", "x86asm", "wgsl", "yaml", "yml", "zsh", "zig",
     ];
-    all.into_iter().filter(|t| matches!(*t, "python" | "py" | "markdown" | "md") || Language::from_token(t).is_some()).collect()
+    all.into_iter().filter(|t| matches!(*t, "python" | "py" | "markdown" | "md") || Language::from_token(resolve_alias(t)).is_some()).collect()
 }
 
 fn lookup_vendored(name: &str) -> PyResult<&'static str> {
