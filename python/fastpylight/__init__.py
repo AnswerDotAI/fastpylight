@@ -1,2 +1,2 @@
-__version__ = '0.1.1'
+__version__ = '0.1.2'
 from fastpylight._core import tokenize, highlight, highlight_spans, languages, theme_css, themes
