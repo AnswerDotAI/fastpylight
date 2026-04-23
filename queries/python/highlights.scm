@@ -164,16 +164,6 @@
 ] @keyword.control.return
 (yield "from" @keyword.control.return)
 
-; -------
-; Imports
-; -------
- 
-(dotted_name
-  (identifier)* @namespace)
-
-(aliased_import
-  alias: (identifier) @namespace)
-
 ; - Builtins
 (none) @constant.builtin ; Has to be before types
 
@@ -183,6 +173,20 @@
  
 ((identifier) @type 
  (#match? @type "^[A-Z]")) ; Has to be before constructor due to this being a more general match 
+
+; -------
+; Imports (override @type match above so import identifiers stay plain)
+; -------
+
+(import_statement (dotted_name (identifier) @variable))
+(import_statement (aliased_import
+  name: (dotted_name (identifier) @variable)
+  alias: (identifier) @variable))
+(import_from_statement module_name: (dotted_name (identifier) @variable))
+(import_from_statement name: (dotted_name (identifier) @variable))
+(import_from_statement (aliased_import
+  name: (dotted_name (identifier) @variable)
+  alias: (identifier) @variable))
 
 ; In type hints make everything types to catch non-conforming identifiers
 ; (e.g., datetime.datetime) and None
