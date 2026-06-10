@@ -22,6 +22,6 @@ Repository = "https://github.com/AnswerDotAI/fastpylight"
 Issues = "https://github.com/AnswerDotAI/fastpylight/issues"
 
 [tool.maturin]
-features = ["pyo3/extension-module"]
+features = ["extension-module"]
 python-source = "python"
 module-name = "fastpylight._core"

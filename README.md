@@ -7,6 +7,22 @@
 pip install fastpylight
 ```
 
+## Rust
+
+`fastpylight` can also be used as a Rust library without PyO3:
+
+```toml
+[dependencies]
+fastpylight = { path = "../fastpylight", default-features = false, features = ["all-languages"] }
+```
+
+Use `write_highlighted_inner` when the caller already owns the surrounding `<pre><code>` block:
+
+```rust
+let mut out = String::new();
+fastpylight::write_highlighted_inner("def f(): return 1", "python", "hl-", &mut out)?;
+```
+
 ## Usage
 
 > [!NOTE]

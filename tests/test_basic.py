@@ -1,4 +1,4 @@
-from fastpylight import tokenize, highlight, languages
+from fastpylight import highlight, highlight_spans, languages, theme_css, tokenize
 
 def test_tokenize():
     toks = tokenize("def foo(): return 42", "python")
@@ -15,3 +15,14 @@ def test_languages():
 def test_highlight():
     html = highlight("let x = 1;", "javascript")
     assert "<pre>" in html
+
+def test_highlight_spans():
+    html = highlight_spans('if x < 1: return "&"', "python")
+    assert html.startswith("<pre><code>")
+    assert 'class="hl-keyword-control-conditional"' in html
+    assert "&lt;" in html
+    assert "&quot;&amp;&quot;" in html
+
+def test_theme_css_class_prefix():
+    css = theme_css("github_light", "pre code", "hl-")
+    assert "pre code .hl-" in css
