@@ -738,6 +738,7 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_languages, m)?)?;
     m.add_function(wrap_pyfunction!(py_theme_css, m)?)?;
     m.add_function(wrap_pyfunction!(py_themes, m)?)?;
+    m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
 }
 

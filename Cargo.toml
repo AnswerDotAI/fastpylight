@@ -16,9 +16,9 @@ language-python = ["inkjet/language-python"]
 themes = ["inkjet/theme"]
 
 [dependencies]
-pyo3 = { version = "0.22", optional = true }
-inkjet = { version = "0.11", default-features = false }
+pyo3 = { version = ">=0.28", optional = true }
+inkjet = { version = ">=0.11", default-features = false }
 thiserror = "1"
-tree-sitter = "0.23"
-tree-sitter-highlight = "0.23"
-tree-sitter-md = "0.3"
+tree-sitter = ">=0.23"
+tree-sitter-highlight = ">=0.23"
+tree-sitter-md = ">=0.3"

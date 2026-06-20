@@ -4,7 +4,7 @@ build-backend = "maturin"
 
 [project]
 name = "fastpylight"
-version = "0.1.6"
+dynamic = ["version"]
 description = "Fast syntax highlighting using tree-sitter, powered by Rust"
 license = {text = "MIT OR Apache-2.0"}
 requires-python = ">=3.10"
@@ -25,3 +25,9 @@ Issues = "https://github.com/AnswerDotAI/fastpylight/issues"
 features = ["extension-module"]
 python-source = "python"
 module-name = "fastpylight._core"
+
+[tool.fastship]
+branch = "main"
+
+[tool.fastship.rs]
+bins = []
