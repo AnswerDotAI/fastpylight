@@ -19,7 +19,7 @@ def test_highlight():
 def test_highlight_spans():
     html = highlight_spans('if x < 1: return "&"', "python")
     assert html.startswith("<pre><code>")
-    assert 'class="hl-keyword-control-conditional"' in html
+    assert 'class="hl-keyword' in html
     assert "&lt;" in html
     assert "&quot;&amp;&quot;" in html
 

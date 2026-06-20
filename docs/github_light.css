@@ -1,0 +1,203 @@
+/* Example CSS for fastpylight using Lumis github_light.
+ * Works with highlight_spans(..., "hl-") and highlight(...).
+ */
+
+hl-code > pre, pre code { color: #1f2328; background-color: #ffffff; }
+pre code .hl-attribute, ::highlight(attribute) { color: #0550ae; }
+pre code .hl-attribute-builtin, ::highlight(attribute-builtin) { color: #1f2328; }
+pre code .hl-boolean, ::highlight(boolean) { color: #0550ae; }
+pre code .hl-character, ::highlight(character) { color: #0a3069; }
+pre code .hl-character-special, ::highlight(character-special) { color: #1f2328; }
+pre code .hl-comment, ::highlight(comment) { color: #57606a; }
+pre code .hl-comment-documentation, ::highlight(comment-documentation) { color: #57606a; }
+pre code .hl-comment-note, ::highlight(comment-note) { color: #0969da; }
+pre code .hl-comment-error, ::highlight(comment-error) {
+  color: #ffffff;
+  background-color: #d1242f;
+}
+pre code .hl-comment-hint, ::highlight(comment-hint) {
+  color: #ffffff;
+  background-color: #d0d7de;
+}
+pre code .hl-comment-todo, ::highlight(comment-todo) {
+  color: #ffffff;
+  background-color: #d0d7de;
+}
+pre code .hl-comment-warning, ::highlight(comment-warning) {
+  color: #ffffff;
+  background-color: #9a6700;
+}
+pre code .hl-constant, ::highlight(constant) { color: #0550ae; }
+pre code .hl-constant-builtin, ::highlight(constant-builtin) { color: #0550ae; }
+pre code .hl-constant-builtin-rust, ::highlight(constant-builtin-rust) { color: #953800; }
+pre code .hl-constant-html, ::highlight(constant-html) { color: #116329; }
+pre code .hl-constant-macro, ::highlight(constant-macro) { color: #cf222e; }
+pre code .hl-constructor, ::highlight(constructor) { color: #953800; }
+pre code .hl-constructor-lua, ::highlight(constructor-lua) { color: #1f2328; }
+pre code .hl-diff-delta, ::highlight(diff-delta) {
+  color: #9a6700;
+  background-color: #d8cab3;
+}
+pre code .hl-diff-minus, ::highlight(diff-minus) {
+  color: #d1242f;
+  background-color: #e4b7be;
+}
+pre code .hl-diff-plus, ::highlight(diff-plus) {
+  color: #1a7f37;
+  background-color: #b8d0bf;
+}
+pre code .hl-function, ::highlight(function) { color: #6639ba; }
+pre code .hl-function-builtin-bash, ::highlight(function-builtin-bash) { color: #cf222e; }
+pre code .hl-function-builtin-lua, ::highlight(function-builtin-lua) { color: #0550ae; }
+pre code .hl-function-builtin-make, ::highlight(function-builtin-make) { color: #0550ae; }
+pre code .hl-function-call, ::highlight(function-call) { color: #6639ba; }
+pre code .hl-function-call-bash, ::highlight(function-call-bash) { color: #0550ae; }
+pre code .hl-function-macro, ::highlight(function-macro) { color: #6639ba; }
+pre code .hl-function-method, ::highlight(function-method) { color: #6639ba; }
+pre code .hl-function-method-call, ::highlight(function-method-call) { color: #6639ba; }
+pre code .hl-highlighted, ::highlight(highlighted) { background-color: #e7eaf0; }
+pre code .hl-keyword, ::highlight(keyword) { color: #cf222e; }
+pre code .hl-keyword-conditional, ::highlight(keyword-conditional) { color: #cf222e; }
+pre code .hl-keyword-conditional-ternary, ::highlight(keyword-conditional-ternary) { color: #cf222e; }
+pre code .hl-keyword-coroutine, ::highlight(keyword-coroutine) { color: #cf222e; }
+pre code .hl-keyword-debug, ::highlight(keyword-debug) { color: #cf222e; }
+pre code .hl-keyword-directive, ::highlight(keyword-directive) { color: #cf222e; }
+pre code .hl-keyword-directive-define, ::highlight(keyword-directive-define) { color: #cf222e; }
+pre code .hl-keyword-directive-rust, ::highlight(keyword-directive-rust) { color: #0550ae; }
+pre code .hl-keyword-exception, ::highlight(keyword-exception) { color: #0550ae; }
+pre code .hl-keyword-export, ::highlight(keyword-export) { color: #cf222e; }
+pre code .hl-keyword-function, ::highlight(keyword-function) { color: #cf222e; }
+pre code .hl-keyword-import, ::highlight(keyword-import) { color: #cf222e; }
+pre code .hl-keyword-modifier, ::highlight(keyword-modifier) { color: #cf222e; }
+pre code .hl-keyword-operator, ::highlight(keyword-operator) { color: #cf222e; }
+pre code .hl-keyword-repeat, ::highlight(keyword-repeat) { color: #cf222e; }
+pre code .hl-keyword-return, ::highlight(keyword-return) { color: #cf222e; }
+pre code .hl-keyword-type, ::highlight(keyword-type) { color: #cf222e; }
+pre code .hl-label, ::highlight(label) { color: #116329; }
+pre code .hl-label-ruby, ::highlight(label-ruby) { color: #0550ae; }
+pre code .hl-markup, ::highlight(markup) { color: #1f2328; }
+pre code .hl-markup-environment, ::highlight(markup-environment) { color: #cf222e; }
+pre code .hl-markup-environment-name, ::highlight(markup-environment-name) { color: #6639ba; }
+pre code .hl-markup-heading, ::highlight(markup-heading) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-1, ::highlight(markup-heading-1) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-2, ::highlight(markup-heading-2) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-3, ::highlight(markup-heading-3) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-4, ::highlight(markup-heading-4) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-5, ::highlight(markup-heading-5) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-6, ::highlight(markup-heading-6) {
+  color: #0550ae;
+  font-weight: bold;
+}
+pre code .hl-markup-heading-html, ::highlight(markup-heading-html) { color: #1f2328; }
+pre code .hl-markup-italic, ::highlight(markup-italic) {
+  color: #1f2328;
+  font-style: italic;
+}
+pre code .hl-markup-link, ::highlight(markup-link) {
+  color: #1f2328;
+  text-decoration: underline;
+}
+pre code .hl-markup-link-label, ::highlight(markup-link-label) { color: #1f2328; }
+pre code .hl-markup-link-url, ::highlight(markup-link-url) {
+  color: #1f2328;
+  text-decoration: underline;
+}
+pre code .hl-markup-list, ::highlight(markup-list) { color: #0550ae; }
+pre code .hl-markup-list-bash, ::highlight(markup-list-bash) { color: #1f2328; }
+pre code .hl-markup-list-checked, ::highlight(markup-list-checked) { color: #116329; }
+pre code .hl-markup-list-unchecked, ::highlight(markup-list-unchecked) { color: #57606a; }
+pre code .hl-markup-math, ::highlight(markup-math) { color: #1f2328; }
+pre code .hl-markup-quote, ::highlight(markup-quote) { color: #1f2328; }
+pre code .hl-markup-quote-markdown, ::highlight(markup-quote-markdown) { color: #116329; }
+pre code .hl-markup-raw, ::highlight(markup-raw) {
+  color: #1f2328;
+  font-style: italic;
+}
+pre code .hl-markup-raw-block, ::highlight(markup-raw-block) {
+  color: #1f2328;
+  font-style: italic;
+}
+pre code .hl-markup-strikethrough, ::highlight(markup-strikethrough) {
+  color: #1f2328;
+  text-decoration: line-through;
+}
+pre code .hl-markup-strong, ::highlight(markup-strong) {
+  color: #1f2328;
+  font-weight: bold;
+}
+pre code .hl-markup-underline, ::highlight(markup-underline) { text-decoration: underline; }
+pre code .hl-module, ::highlight(module) { color: #cf222e; }
+pre code .hl-module-builtin, ::highlight(module-builtin) { color: #0550ae; }
+pre code .hl-module-c_sharp, ::highlight(module-c_sharp) { color: #953800; }
+pre code .hl-module-elixir, ::highlight(module-elixir) { color: #953800; }
+pre code .hl-module-php, ::highlight(module-php) { color: #953800; }
+pre code .hl-number, ::highlight(number) { color: #0550ae; }
+pre code .hl-number-float, ::highlight(number-float) { color: #0550ae; }
+pre code .hl-operator, ::highlight(operator) { color: #0550ae; }
+pre code .hl-operator-bash, ::highlight(operator-bash) { color: #cf222e; }
+pre code .hl-operator-lua, ::highlight(operator-lua) { color: #cf222e; }
+pre code .hl-property, ::highlight(property) { color: #0550ae; }
+pre code .hl-property-json, ::highlight(property-json) { color: #116329; }
+pre code .hl-property-lua, ::highlight(property-lua) { color: #1f2328; }
+pre code .hl-property-yaml, ::highlight(property-yaml) { color: #116329; }
+pre code .hl-punctuation-bracket, ::highlight(punctuation-bracket) { color: #1f2328; }
+pre code .hl-punctuation-delimiter, ::highlight(punctuation-delimiter) { color: #1f2328; }
+pre code .hl-punctuation-delimiter-bash, ::highlight(punctuation-delimiter-bash) { color: #cf222e; }
+pre code .hl-punctuation-special, ::highlight(punctuation-special) { color: #1f2328; }
+pre code .hl-string, ::highlight(string) { color: #0a3069; }
+pre code .hl-string-documentation, ::highlight(string-documentation) { color: #0a3069; }
+pre code .hl-string-escape, ::highlight(string-escape) {
+  color: #0a3069;
+  font-weight: bold;
+}
+pre code .hl-string-regexp, ::highlight(string-regexp) { color: #0a3069; }
+pre code .hl-string-special, ::highlight(string-special) { color: #1f2328; }
+pre code .hl-string-special-path, ::highlight(string-special-path) { color: #1f2328; }
+pre code .hl-string-special-path-gitignore, ::highlight(string-special-path-gitignore) { color: #6639ba; }
+pre code .hl-string-special-path-nix, ::highlight(string-special-path-nix) { color: #0a3069; }
+pre code .hl-string-special-symbol, ::highlight(string-special-symbol) { color: #0550ae; }
+pre code .hl-string-special-symbol-make, ::highlight(string-special-symbol-make) { color: #6639ba; }
+pre code .hl-string-special-url, ::highlight(string-special-url) {
+  color: #0550ae;
+  font-style: italic;
+  text-decoration: underline;
+}
+pre code .hl-tag, ::highlight(tag) { color: #116329; }
+pre code .hl-tag-attribute, ::highlight(tag-attribute) { color: #0550ae; }
+pre code .hl-tag-builtin, ::highlight(tag-builtin) { color: #116329; }
+pre code .hl-tag-delimiter-javascript, ::highlight(tag-delimiter-javascript) { color: #0550ae; }
+pre code .hl-tag-delimiter-tsx, ::highlight(tag-delimiter-tsx) { color: #0550ae; }
+pre code .hl-tag-javascript, ::highlight(tag-javascript) { color: #953800; }
+pre code .hl-tag-tsx, ::highlight(tag-tsx) { color: #953800; }
+pre code .hl-type, ::highlight(type) { color: #953800; }
+pre code .hl-type-builtin, ::highlight(type-builtin) { color: #cf222e; }
+pre code .hl-type-builtin-python, ::highlight(type-builtin-python) { color: #0550ae; }
+pre code .hl-type-css, ::highlight(type-css) { color: #116329; }
+pre code .hl-type-definition, ::highlight(type-definition) { color: #953800; }
+pre code .hl-type-sql, ::highlight(type-sql) { color: #1f2328; }
+pre code .hl-variable, ::highlight(variable) { color: #1f2328; }
+pre code .hl-variable-builtin, ::highlight(variable-builtin) { color: #0550ae; }
+pre code .hl-variable-member, ::highlight(variable-member) { color: #0550ae; }
+pre code .hl-variable-member-python, ::highlight(variable-member-python) { color: #1f2328; }
+pre code .hl-variable-parameter, ::highlight(variable-parameter) { color: #1f2328; }
+pre code .hl-variable-parameter-builtin, ::highlight(variable-parameter-builtin) { color: #0550ae; }
+pre code .hl-variable-sql, ::highlight(variable-sql) { color: #0550ae; }
+
