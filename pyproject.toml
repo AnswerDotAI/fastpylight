@@ -24,6 +24,9 @@ Homepage = "https://github.com/AnswerDotAI/fastpylight"
 Repository = "https://github.com/AnswerDotAI/fastpylight"
 Issues = "https://github.com/AnswerDotAI/fastpylight/issues"
 
+[project.entry-points.fastaudit_safe_native]
+fastpylight = "fastpylight"
+
 [tool.maturin]
 features = ["extension-module"]
 python-source = "python"
