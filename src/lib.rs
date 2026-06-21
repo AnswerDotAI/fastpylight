@@ -3,9 +3,11 @@ use lumis::languages::Language;
 use lumis::themes as lumis_themes;
 use thiserror::Error;
 
+use std::panic::{catch_unwind, AssertUnwindSafe};
+
 #[cfg(feature = "themes")]
 use lumis::themes::Style;
-use pyo3::exceptions::PyValueError;
+use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -233,9 +235,20 @@ fn py_err(err: HighlightError) -> PyErr {
     PyValueError::new_err(err.to_string())
 }
 
+/// Run a panic-prone pure-Rust step, converting any panic into a clean
+/// `RuntimeError` instead of surfacing pyo3's `BaseException`-derived
+/// `PanicException`.
+fn guard<T>(what: &str, f: impl FnOnce() -> T) -> PyResult<T> {
+    catch_unwind(AssertUnwindSafe(f)).map_err(|_| {
+        PyRuntimeError::new_err(format!(
+            "internal error in fastpylight while {what} (this is a bug, please report it)"
+        ))
+    })
+}
+
 #[pyfunction(name = "tokenize")]
 fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
-    tokenize(code, lang)
+    guard("tokenizing", || tokenize(code, lang))?
         .map(|toks| {
             toks.into_iter()
                 .map(|tok| (tok.start, tok.end, tok.kind))
@@ -246,13 +259,14 @@ fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> 
 
 #[pyfunction(name = "highlight")]
 fn py_highlight(code: &str, lang: &str) -> PyResult<String> {
-    highlight_component(code, lang).map_err(py_err)
+    guard("highlighting", || highlight_component(code, lang))?.map_err(py_err)
 }
 
 #[pyfunction(name = "highlight_spans")]
 #[pyo3(signature = (code, lang, class_prefix=None))]
 fn py_highlight_spans(code: &str, lang: &str, class_prefix: Option<&str>) -> PyResult<String> {
-    highlight_spans(code, lang, class_prefix.unwrap_or("hl-")).map_err(py_err)
+    let cp = class_prefix.unwrap_or("hl-");
+    guard("highlighting", || highlight_spans(code, lang, cp))?.map_err(py_err)
 }
 
 #[pyfunction(name = "languages")]
@@ -267,7 +281,8 @@ fn py_theme_css(
     selector: Option<&str>,
     class_prefix: Option<&str>,
 ) -> PyResult<String> {
-    theme_css(theme, selector, class_prefix.unwrap_or("")).map_err(py_err)
+    let cp = class_prefix.unwrap_or("");
+    guard("building theme css", || theme_css(theme, selector, cp))?.map_err(py_err)
 }
 
 #[pyfunction(name = "themes")]
