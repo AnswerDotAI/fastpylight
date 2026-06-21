@@ -31,6 +31,3 @@ module-name = "fastpylight._core"
 
 [tool.fastship]
 branch = "main"
-
-[tool.fastship.rs]
-bins = []
