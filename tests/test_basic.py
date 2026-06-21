@@ -1,4 +1,6 @@
-from fastpylight import highlight, highlight_spans, languages, theme_css, tokenize
+import pytest
+
+from fastpylight import highlight, highlight_spans, languages, theme_css, themes, tokenize
 
 def test_tokenize():
     toks = tokenize("def foo(): return 42", "python")
@@ -26,3 +28,18 @@ def test_highlight_spans():
 def test_theme_css_class_prefix():
     css = theme_css("github_light", "pre code", "hl-")
     assert "pre code .hl-" in css
+
+def test_theme_css_highlight_selectors():
+    css = theme_css("github_light")
+    assert "::highlight(" in css
+
+def test_unknown_language_raises():
+    with pytest.raises(ValueError): tokenize("x", "not-a-language")
+
+def test_non_ascii_is_safe():
+    assert "é" in highlight_spans('s = "é"\n', "python")
+
+def test_themes():
+    ts = themes()
+    assert "github_light" in ts
+    assert ts == sorted(ts)

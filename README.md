@@ -41,23 +41,9 @@ css = theme_css("github_light", "pre code", "hl-")
 
 The exact classes depend on Lumis scopes. A complete GitHub Light CSS example for both output modes is in [docs/github_light.css](docs/github_light.css).
 
-## Rust
+## Languages
 
-`fastpylight` can also be used as a Rust library without PyO3:
-
-```toml
-[dependencies]
-fastpylight = { path = "../fastpylight", default-features = false, features = ["standard-languages"] }
-```
-
-Use `write_highlighted_inner` when the caller already owns the surrounding `<pre><code>` block:
-
-```rust
-let mut out = String::new();
-fastpylight::write_highlighted_inner("def f(): return 1", "python", "hl-", &mut out)?;
-```
-
-The default language set enables Lumis web, web-extra, system, and backend bundles, plus R, Julia, PowerShell, Lua, Swift, MATLAB, Perl, Pascal, Fortran, and Objective-C. Use the `all-languages` feature if you want Lumis' full language set.
+The default language set enables Lumis web, web-extra, system, and backend bundles, plus R, Julia, PowerShell, Lua, Swift, MATLAB, Perl, Pascal, Fortran, and Objective-C.
 
 ## CSS Highlight API
 

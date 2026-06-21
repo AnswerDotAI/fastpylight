@@ -5,9 +5,7 @@ use thiserror::Error;
 
 #[cfg(feature = "themes")]
 use lumis::themes::Style;
-#[cfg(feature = "pyo3")]
 use pyo3::exceptions::PyValueError;
-#[cfg(feature = "pyo3")]
 use pyo3::prelude::*;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -145,7 +143,6 @@ pub fn highlight_spans(
     Ok(out)
 }
 
-#[cfg(feature = "pyo3")]
 fn byte_to_utf16_table(s: &str) -> Vec<usize> {
     let mut table = vec![0usize; s.len() + 1];
     let mut utf16_idx = 0usize;
@@ -157,7 +154,6 @@ fn byte_to_utf16_table(s: &str) -> Vec<usize> {
     table
 }
 
-#[cfg(feature = "pyo3")]
 fn highlight_component(code: &str, lang: &str) -> Result<String, HighlightError> {
     let toks = tokenize(code, lang)?;
     let b2c = byte_to_utf16_table(code);
@@ -233,12 +229,10 @@ pub fn themes() -> Vec<&'static str> {
     names
 }
 
-#[cfg(feature = "pyo3")]
 fn py_err(err: HighlightError) -> PyErr {
     PyValueError::new_err(err.to_string())
 }
 
-#[cfg(feature = "pyo3")]
 #[pyfunction(name = "tokenize")]
 fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
     tokenize(code, lang)
@@ -250,26 +244,22 @@ fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> 
         .map_err(py_err)
 }
 
-#[cfg(feature = "pyo3")]
 #[pyfunction(name = "highlight")]
 fn py_highlight(code: &str, lang: &str) -> PyResult<String> {
     highlight_component(code, lang).map_err(py_err)
 }
 
-#[cfg(feature = "pyo3")]
 #[pyfunction(name = "highlight_spans")]
 #[pyo3(signature = (code, lang, class_prefix=None))]
 fn py_highlight_spans(code: &str, lang: &str, class_prefix: Option<&str>) -> PyResult<String> {
     highlight_spans(code, lang, class_prefix.unwrap_or("hl-")).map_err(py_err)
 }
 
-#[cfg(feature = "pyo3")]
 #[pyfunction(name = "languages")]
 fn py_languages() -> Vec<&'static str> {
     languages()
 }
 
-#[cfg(feature = "pyo3")]
 #[pyfunction(name = "theme_css")]
 #[pyo3(signature = (theme, selector=None, class_prefix=None))]
 fn py_theme_css(
@@ -280,13 +270,11 @@ fn py_theme_css(
     theme_css(theme, selector, class_prefix.unwrap_or("")).map_err(py_err)
 }
 
-#[cfg(feature = "pyo3")]
 #[pyfunction(name = "themes")]
 fn py_themes() -> Vec<&'static str> {
     themes()
 }
 
-#[cfg(feature = "pyo3")]
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_tokenize, m)?)?;
@@ -297,62 +285,4 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_themes, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn tokenize_python_returns_sorted_tokens() {
-        let toks = tokenize("def f(): return 1", "python").unwrap();
-        assert!(!toks.is_empty());
-        let starts: Vec<_> = toks.iter().map(|tok| tok.start).collect();
-        let mut sorted = starts.clone();
-        sorted.sort();
-        assert_eq!(starts, sorted);
-    }
-
-    #[test]
-    fn highlighted_inner_has_only_inner_markup() {
-        let html = highlighted_inner("if x < 1:\n    return \"&\"", "python", "hl-").unwrap();
-        assert!(html.contains("<span class=\"hl-keyword"));
-        assert!(html.contains("&lt;"));
-        assert!(html.contains("&quot;&amp;&quot;"));
-        assert!(!html.contains("<pre>"));
-        assert!(!html.contains("<code>"));
-    }
-
-    #[test]
-    fn highlight_spans_wraps_pre_code() {
-        let html = highlight_spans("let x = 1;", "javascript", "hl-").unwrap();
-        assert!(html.starts_with("<pre><code>"));
-        assert!(html.ends_with("</code></pre>"));
-    }
-
-    #[test]
-    fn unknown_language_errors() {
-        assert!(matches!(
-            tokenize("x", "not-a-language"),
-            Err(HighlightError::UnknownLanguage(_))
-        ));
-    }
-
-    #[test]
-    fn non_ascii_input_is_safe() {
-        let html = highlighted_inner("s = \"é\"\n", "python", "hl-").unwrap();
-        assert!(html.contains("é"));
-    }
-
-    #[test]
-    fn theme_css_emits_class_selectors() {
-        let css = theme_css("github_light", Some("pre code"), "hl-").unwrap();
-        assert!(css.contains("pre code .hl-"));
-    }
-
-    #[test]
-    fn theme_css_emits_css_highlight_selectors() {
-        let css = theme_css("github_light", None, "hl-").unwrap();
-        assert!(css.contains("::highlight("));
-    }
 }

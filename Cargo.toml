@@ -10,8 +10,7 @@ crate-type = ["rlib", "cdylib"]
 
 [features]
 default = ["standard-languages", "themes"]
-extension-module = ["pyo3", "pyo3/extension-module"]
-pyo3 = ["dep:pyo3"]
+extension-module = ["pyo3/extension-module"]
 standard-languages = [
     "lumis/lang-bundle-web",
     "lumis/lang-bundle-web-extra",
@@ -32,6 +31,6 @@ all-languages = ["lumis/all-languages"]
 themes = []
 
 [dependencies]
-pyo3 = { version = ">=0.28", optional = true }
+pyo3 = ">=0.28"
 lumis = { version = "0.10", default-features = false }
 thiserror = "2"
