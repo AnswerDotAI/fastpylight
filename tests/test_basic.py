@@ -1,6 +1,6 @@
 import pytest
 
-from fastpylight import highlight, highlight_spans, languages, theme_css, themes, tokenize
+from fastpylight import guess, highlight, highlight_spans, languages, theme_css, themes, tokenize
 
 def test_tokenize():
     toks = tokenize("def foo(): return 42", "python")
@@ -43,3 +43,13 @@ def test_themes():
     ts = themes()
     assert "github_light" in ts
     assert ts == sorted(ts)
+
+def test_plaintext_is_unhighlighted():
+    # 'plaintext' must select the PlainText lexer, not the diff lexer:
+    # leading -/+ lines should NOT be tokenized.
+    assert tokenize("- milk\n+ eggs\n", "plaintext") == []
+    assert "toks='[]'" in highlight("- milk\n+ eggs\n", "plaintext")
+
+def test_guess():
+    assert guess("anything", "python") == "python"   # explicit hint resolves
+    assert guess("just some prose here") == "plaintext"  # no match -> fallback

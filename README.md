@@ -9,7 +9,7 @@ pip install fastpylight
 ## Python
 
 ```py
-from fastpylight import highlight, highlight_spans, theme_css
+from fastpylight import highlight, highlight_spans, guess, theme_css
 
 code = "def f(x):\n    return x + 1\n"
 
@@ -44,6 +44,22 @@ The exact classes depend on Lumis scopes. A complete GitHub Light CSS example fo
 ## Languages
 
 The default language set enables Lumis web, web-extra, system, and backend bundles, plus R, Julia, PowerShell, Lua, Swift, MATLAB, Perl, Pascal, Fortran, and Objective-C.
+
+`languages()` lists every available name. The highlighting functions need an exact language name and raise `ValueError` on an unknown one. Use `"plaintext"` for un-highlighted output:
+
+```py
+highlight(code, "plaintext")  # toks='[]', no tokens
+```
+
+To detect a language instead of specifying one, use `guess`, which takes the code plus an optional hint (a name, extension, or filename) and falls back to `"plaintext"` when nothing matches:
+
+```py
+guess("fn main() {}", "rs")        # 'rust'  (extension hint)
+guess("#!/usr/bin/env python\n")   # 'python' (shebang)
+guess("just some prose")           # 'plaintext' (no match)
+
+highlight(code, guess(code))       # detect, then highlight
+```
 
 ## CSS Highlight API
 

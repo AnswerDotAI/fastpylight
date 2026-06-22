@@ -28,8 +28,17 @@ pub enum HighlightError {
 }
 
 fn parse_lang(lang: &str) -> Result<Language, HighlightError> {
+    // `PlainText` has no `FromStr` alias in lumis, so its `id_name` can't be
+    // parsed; special-case it so the requested-language path can select it.
+    if lang.eq_ignore_ascii_case(Language::PlainText.id_name()) {
+        return Ok(Language::PlainText);
+    }
     lang.parse::<Language>()
         .map_err(|_| HighlightError::UnknownLanguage(lang.to_string()))
+}
+
+pub fn guess(lang: Option<&str>, code: &str) -> &'static str {
+    Language::guess(lang, code).id_name()
 }
 
 pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
@@ -274,6 +283,12 @@ fn py_languages() -> Vec<&'static str> {
     languages()
 }
 
+#[pyfunction(name = "guess")]
+#[pyo3(signature = (code, lang=None))]
+fn py_guess(code: &str, lang: Option<&str>) -> PyResult<&'static str> {
+    guard("guessing language", || guess(lang, code))
+}
+
 #[pyfunction(name = "theme_css")]
 #[pyo3(signature = (theme, selector=None, class_prefix=None))]
 fn py_theme_css(
@@ -296,6 +311,7 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_highlight, m)?)?;
     m.add_function(wrap_pyfunction!(py_highlight_spans, m)?)?;
     m.add_function(wrap_pyfunction!(py_languages, m)?)?;
+    m.add_function(wrap_pyfunction!(py_guess, m)?)?;
     m.add_function(wrap_pyfunction!(py_theme_css, m)?)?;
     m.add_function(wrap_pyfunction!(py_themes, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
