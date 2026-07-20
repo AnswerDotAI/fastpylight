@@ -1,6 +1,6 @@
 import pytest
 
-from fastpylight import guess, highlight, highlight_spans, languages, theme_css, themes, tokenize
+from fastpylight import guess, highlight, highlight_spans, languages, theme_colors, theme_css, themes, tokenize
 
 def test_tokenize():
     toks = tokenize("def foo(): return 42", "python")
@@ -44,6 +44,15 @@ def test_themes():
     assert "github_light" in ts
     assert ts == sorted(ts)
 
+def test_theme_colors():
+    tc = theme_colors("github_light")
+    assert "normal" in tc and tc["normal"]["fg"]          # theme_css skips normal; the data API must not
+    kw = tc["keyword"]
+    assert kw["fg"].startswith("#")
+    assert set(kw) == {"fg", "bg", "bold", "italic", "underline", "strikethrough"}
+    assert "attribute.builtin" in tc                      # dotted scopes, not CSS-hyphenated
+    assert tc["comment.error"]["bg"].startswith("#")
+
 def test_plaintext_is_unhighlighted():
     # 'plaintext' must select the PlainText lexer, not the diff lexer:
     # leading -/+ lines should NOT be tokenized.
@@ -53,3 +62,15 @@ def test_plaintext_is_unhighlighted():
 def test_guess():
     assert guess("anything", "python") == "python"   # explicit hint resolves
     assert guess("just some prose here") == "plaintext"  # no match -> fallback
+
+def test_markdown_specimen():
+    "Markdown is quotation: embedded fence bodies flatten to markup.raw.block; markdown's own structure keeps its scopes"
+    md = '# Head\n\nSome `inline` code:\n\n``` rust\nfn main() {}\n```\n'
+    toks = tokenize(md, "markdown")
+    kinds = {k for _, _, k in toks}
+    assert not any(k.startswith(("keyword", "function", "punctuation")) for k in kinds), kinds
+    assert "markup.heading.1" in kinds
+    assert "markup.raw" in kinds       # the `inline` span
+    body = md.index("fn main")
+    assert any(s <= body and e >= body + len("fn main() {}") and k == "markup.raw.block"
+               for s, e, k in toks)    # fence body is one flat raw run

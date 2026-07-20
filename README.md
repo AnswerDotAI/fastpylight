@@ -45,6 +45,8 @@ The exact classes depend on Lumis scopes. A complete GitHub Light CSS example fo
 
 The default language set enables Lumis web, web-extra, system, and backend bundles, plus R, Julia, PowerShell, Lua, Swift, MATLAB, Perl, Pascal, Fortran, and Objective-C.
 
+Markdown is treated as quotation: fenced code bodies and other injected languages flatten to the `markup.raw.block` scope instead of being highlighted as the embedded language, so markdown source specimens read as markdown. Markdown's own structure (headings, fence markers, info strings, inline code) keeps its scopes.
+
 `languages()` lists every available name. The highlighting functions need an exact language name and raise `ValueError` on an unknown one. Use `"plaintext"` for un-highlighted output:
 
 ```py
@@ -101,3 +103,5 @@ You can generate CSS at runtime:
 highlight_css = theme_css("github_light")
 span_css = theme_css("github_light", "pre code", "hl-")
 ```
+
+For non-CSS consumers (e.g. document converters), `theme_colors("github_light")` returns the same theme as data: a dict of dotted scope names (including `normal`, which the CSS omits) to `{'fg', 'bg', 'bold', 'italic', 'underline', 'strikethrough'}`.

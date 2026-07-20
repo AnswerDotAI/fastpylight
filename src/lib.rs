@@ -9,6 +9,7 @@ use std::panic::{catch_unwind, AssertUnwindSafe};
 use lumis::themes::Style;
 use pyo3::exceptions::{PyRuntimeError, PyValueError};
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token {
@@ -43,19 +44,35 @@ pub fn guess(lang: Option<&str>, code: &str) -> &'static str {
 
 pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
     let language = parse_lang(lang)?;
-    let mut toks = Vec::new();
+    let host_md = matches!(language, Language::Markdown | Language::MarkdownInline);
+    let mut toks: Vec<Token> = Vec::new();
     highlight_iter(
         code,
         language,
         None,
-        |_, _, range, scope, _| -> Result<(), std::fmt::Error> {
-            if !scope.is_empty() {
-                toks.push(Token {
-                    start: range.start,
-                    end: range.end,
-                    kind: scope.to_string(),
-                });
+        |_, tok_lang, range, scope, _| -> Result<(), std::fmt::Error> {
+            // Markdown is quotation: injected-language tokens (fence bodies, raw HTML)
+            // flatten to the base markup.raw.block scope instead of impersonating the
+            // embedded language; markdown's own structure keeps its scopes.
+            let foreign =
+                host_md && !matches!(tok_lang, Language::Markdown | Language::MarkdownInline);
+            let scope = if foreign { "markup.raw.block" } else { scope };
+            if scope.is_empty() {
+                return Ok(());
             }
+            if host_md {
+                if let Some(last) = toks.last_mut() {
+                    if last.kind == scope && last.end >= range.start {
+                        last.end = last.end.max(range.end);
+                        return Ok(());
+                    }
+                }
+            }
+            toks.push(Token {
+                start: range.start,
+                end: range.end,
+                kind: scope.to_string(),
+            });
             Ok(())
         },
     )
@@ -232,6 +249,51 @@ pub fn theme_css(
     Err(HighlightError::Theme("themes feature is disabled".into()))
 }
 
+/// Per-scope theme styles as data: (scope, fg, bg, bold, italic, underline, strikethrough).
+/// Unlike `theme_css`, scope names stay dotted and the `normal` scope is included.
+#[cfg(feature = "themes")]
+pub fn theme_colors(theme: &str) -> Result<ThemeColors, HighlightError> {
+    let theme = lumis_themes::get(theme).map_err(|e| HighlightError::Theme(e.to_string()))?;
+    Ok(theme
+        .highlights
+        .iter()
+        .map(|(scope, style)| {
+            let underline = match style.text_decoration.underline {
+                lumis_themes::UnderlineStyle::None => None,
+                lumis_themes::UnderlineStyle::Solid => Some("solid"),
+                lumis_themes::UnderlineStyle::Wavy => Some("wavy"),
+                lumis_themes::UnderlineStyle::Double => Some("double"),
+                lumis_themes::UnderlineStyle::Dotted => Some("dotted"),
+                lumis_themes::UnderlineStyle::Dashed => Some("dashed"),
+            };
+            (
+                scope.clone(),
+                style.fg.clone(),
+                style.bg.clone(),
+                style.bold,
+                style.italic,
+                underline,
+                style.text_decoration.strikethrough,
+            )
+        })
+        .collect())
+}
+
+pub type ThemeColors = Vec<(
+    String,
+    Option<String>,
+    Option<String>,
+    bool,
+    bool,
+    Option<&'static str>,
+    bool,
+)>;
+
+#[cfg(not(feature = "themes"))]
+pub fn theme_colors(_theme: &str) -> Result<ThemeColors, HighlightError> {
+    Err(HighlightError::Theme("themes feature is disabled".into()))
+}
+
 pub fn themes() -> Vec<&'static str> {
     let mut names: Vec<_> = lumis_themes::available_themes()
         .map(|theme| theme.name.as_str())
@@ -300,6 +362,23 @@ fn py_theme_css(
     guard("building theme css", || theme_css(theme, selector, cp))?.map_err(py_err)
 }
 
+#[pyfunction(name = "theme_colors")]
+fn py_theme_colors(py: Python<'_>, theme: &str) -> PyResult<Py<PyDict>> {
+    let rows = guard("reading theme colors", || theme_colors(theme))?.map_err(py_err)?;
+    let out = PyDict::new(py);
+    for (scope, fg, bg, bold, italic, underline, strikethrough) in rows {
+        let d = PyDict::new(py);
+        d.set_item("fg", fg)?;
+        d.set_item("bg", bg)?;
+        d.set_item("bold", bold)?;
+        d.set_item("italic", italic)?;
+        d.set_item("underline", underline)?;
+        d.set_item("strikethrough", strikethrough)?;
+        out.set_item(scope, d)?;
+    }
+    Ok(out.into())
+}
+
 #[pyfunction(name = "themes")]
 fn py_themes() -> Vec<&'static str> {
     themes()
@@ -313,6 +392,7 @@ fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(py_languages, m)?)?;
     m.add_function(wrap_pyfunction!(py_guess, m)?)?;
     m.add_function(wrap_pyfunction!(py_theme_css, m)?)?;
+    m.add_function(wrap_pyfunction!(py_theme_colors, m)?)?;
     m.add_function(wrap_pyfunction!(py_themes, m)?)?;
     m.add("__version__", env!("CARGO_PKG_VERSION"))?;
     Ok(())
