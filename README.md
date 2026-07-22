@@ -65,7 +65,7 @@ highlight(code, guess(code))       # detect, then highlight
 
 ## CSS Highlight API
 
-The `highlight` function is for browser code that applies token ranges with the CSS Highlight API. A minimal component looks like this:
+The `highlight` function is for browser code that applies token ranges with the CSS Highlight API. `component_js()` returns the reference component:
 
 ```js
 class HlCode extends HTMLElement {

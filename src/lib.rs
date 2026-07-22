@@ -60,13 +60,13 @@ pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
             if scope.is_empty() {
                 return Ok(());
             }
-            if host_md {
-                if let Some(last) = toks.last_mut() {
-                    if last.kind == scope && last.end >= range.start {
-                        last.end = last.end.max(range.end);
-                        return Ok(());
-                    }
-                }
+            if host_md
+                && let Some(last) = toks.last_mut()
+                && last.kind == scope
+                && last.end >= range.start
+            {
+                last.end = last.end.max(range.end);
+                return Ok(());
             }
             toks.push(Token {
                 start: range.start,
