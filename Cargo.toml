@@ -10,7 +10,8 @@ crate-type = ["rlib", "cdylib"]
 
 [features]
 default = ["standard-languages", "themes"]
-extension-module = ["pyo3/extension-module"]
+python = ["dep:pyo3"]
+extension-module = ["python", "pyo3/extension-module"]
 standard-languages = [
     "lumis/lang-bundle-web",
     "lumis/lang-bundle-web-extra",
@@ -31,6 +32,9 @@ all-languages = ["lumis/all-languages"]
 themes = []
 
 [dependencies]
-pyo3 = ">=0.28"
+pyo3 = { version = ">=0.28", optional = true }
 lumis = { version = "0.10", default-features = false }
 thiserror = "2"
+
+[lints.clippy]
+too_many_arguments = "allow"
