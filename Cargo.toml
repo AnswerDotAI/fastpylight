@@ -33,7 +33,7 @@ themes = []
 
 [dependencies]
 pyo3 = { version = ">=0.28", optional = true }
-lumis = { version = "0.10", default-features = false }
+lumis = { version = "0.12", default-features = false }
 thiserror = "2"
 
 [lints.clippy]
