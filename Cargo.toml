@@ -18,15 +18,15 @@ standard-languages = [
     "lumis/lang-bundle-system",
     "lumis/lang-bundle-backend",
     "lumis/lang-r",
-    "lumis/lang-julia",
     "lumis/lang-powershell",
     "lumis/lang-lua",
-    "lumis/lang-swift",
     "lumis/lang-matlab",
     "lumis/lang-perl",
     "lumis/lang-pascal",
     "lumis/lang-fortran",
     "lumis/lang-objc",
+    "lumis/lang-julia",
+    "lumis/lang-swift",
 ]
 all-languages = ["lumis/all-languages"]
 themes = []
