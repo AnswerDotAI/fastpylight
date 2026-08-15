@@ -54,7 +54,7 @@ jobs:
       - uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'dist/*'
-      - uses: astral-sh/setup-uv@v7
+      - uses: astral-sh/setup-uv@v10.0.1
       - run: uv publish 'dist/*'
       - uses: softprops/action-gh-release@v3
         with:

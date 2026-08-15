@@ -6,7 +6,7 @@ build-backend = "maturin"
 name = "fastpylight"
 dynamic = ["version"]
 description = "Fast syntax highlighting using Lumis and Tree-sitter"
-license = {text = "MIT OR Apache-2.0"}
+license = {text = "Apache-2.0"}
 requires-python = ">=3.10"
 readme = "README.md"
 authors = [{name = "Curtis Allan", email = "ca@answer.ai"}]
