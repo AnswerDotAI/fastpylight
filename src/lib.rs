@@ -31,8 +31,7 @@ fn parse_lang(lang: &str) -> Result<Language, HighlightError> {
     if lang.eq_ignore_ascii_case(Language::PlainText.id_name()) {
         return Ok(Language::PlainText);
     }
-    lang.parse::<Language>()
-        .map_err(|_| HighlightError::UnknownLanguage(lang.to_string()))
+    lang.parse::<Language>().map_err(|_| HighlightError::UnknownLanguage(lang.to_string()))
 }
 
 pub fn guess(lang: Option<&str>, code: &str) -> &'static str {
@@ -43,36 +42,26 @@ pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
     let language = parse_lang(lang)?;
     let host_md = matches!(language, Language::Markdown | Language::MarkdownInline);
     let mut toks: Vec<Token> = Vec::new();
-    highlight_iter(
-        code,
-        language,
-        None,
-        |_, tok_lang, range, scope, _| -> Result<(), std::fmt::Error> {
-            // Markdown is quotation: injected-language tokens (fence bodies, raw HTML)
-            // flatten to the base markup.raw.block scope instead of impersonating the
-            // embedded language; markdown's own structure keeps its scopes.
-            let foreign =
-                host_md && !matches!(tok_lang, Language::Markdown | Language::MarkdownInline);
-            let scope = if foreign { "markup.raw.block" } else { scope };
-            if scope.is_empty() {
-                return Ok(());
-            }
-            if host_md
-                && let Some(last) = toks.last_mut()
-                && last.kind == scope
-                && last.end >= range.start
-            {
-                last.end = last.end.max(range.end);
-                return Ok(());
-            }
-            toks.push(Token {
-                start: range.start,
-                end: range.end,
-                kind: scope.to_string(),
-            });
-            Ok(())
-        },
-    )
+    highlight_iter(code, language, None, |_, tok_lang, range, scope, _| -> Result<(), std::fmt::Error> {
+        // Markdown is quotation: injected-language tokens (fence bodies, raw HTML)
+        // flatten to the base markup.raw.block scope instead of impersonating the
+        // embedded language; markdown's own structure keeps its scopes.
+        let foreign = host_md && !matches!(tok_lang, Language::Markdown | Language::MarkdownInline);
+        let scope = if foreign { "markup.raw.block" } else { scope };
+        if scope.is_empty() {
+            return Ok(());
+        }
+        if host_md
+            && let Some(last) = toks.last_mut()
+            && last.kind == scope
+            && last.end >= range.start
+        {
+            last.end = last.end.max(range.end);
+            return Ok(());
+        }
+        toks.push(Token { start: range.start, end: range.end, kind: scope.to_string() });
+        Ok(())
+    })
     .map_err(|e| HighlightError::Highlight(e.to_string()))?;
     toks.sort_by_key(|tok| (tok.start, tok.end));
     Ok(toks)
@@ -94,29 +83,17 @@ fn class_name(kind: &str, class_prefix: &str) -> String {
     format!("{class_prefix}{}", kind.replace('.', "-"))
 }
 
-fn push_escaped_slice(
-    code: &str,
-    start: usize,
-    end: usize,
-    out: &mut String,
-) -> Result<(), HighlightError> {
+fn push_escaped_slice(code: &str, start: usize, end: usize, out: &mut String) -> Result<(), HighlightError> {
     match code.get(start..end) {
         Some(s) => {
             html_escape(s, out);
             Ok(())
         }
-        None => Err(HighlightError::Highlight(format!(
-            "invalid UTF-8 token range: {start}..{end}"
-        ))),
+        None => Err(HighlightError::Highlight(format!("invalid UTF-8 token range: {start}..{end}"))),
     }
 }
 
-pub fn write_highlighted_inner(
-    code: &str,
-    lang: &str,
-    class_prefix: &str,
-    out: &mut String,
-) -> Result<(), HighlightError> {
+pub fn write_highlighted_inner(code: &str, lang: &str, class_prefix: &str, out: &mut String) -> Result<(), HighlightError> {
     let toks = tokenize(code, lang)?;
     let mut pos = 0usize;
     for tok in &toks {
@@ -124,10 +101,7 @@ pub fn write_highlighted_inner(
             continue;
         }
         if tok.start < pos || tok.end < tok.start || tok.end > code.len() {
-            return Err(HighlightError::Highlight(format!(
-                "invalid token range: {}..{}",
-                tok.start, tok.end
-            )));
+            return Err(HighlightError::Highlight(format!("invalid token range: {}..{}", tok.start, tok.end)));
         }
         if pos < tok.start {
             push_escaped_slice(code, pos, tok.start, out)?;
@@ -145,21 +119,13 @@ pub fn write_highlighted_inner(
     Ok(())
 }
 
-pub fn highlighted_inner(
-    code: &str,
-    lang: &str,
-    class_prefix: &str,
-) -> Result<String, HighlightError> {
+pub fn highlighted_inner(code: &str, lang: &str, class_prefix: &str) -> Result<String, HighlightError> {
     let mut out = String::with_capacity(code.len() * 2);
     write_highlighted_inner(code, lang, class_prefix, &mut out)?;
     Ok(out)
 }
 
-pub fn highlight_spans(
-    code: &str,
-    lang: &str,
-    class_prefix: &str,
-) -> Result<String, HighlightError> {
+pub fn highlight_spans(code: &str, lang: &str, class_prefix: &str) -> Result<String, HighlightError> {
     let inner = highlighted_inner(code, lang, class_prefix)?;
     let mut out = String::with_capacity(inner.len() + 24);
     out.push_str("<pre><code>");
@@ -202,9 +168,7 @@ pub fn highlight_component(code: &str, lang: &str) -> Result<String, HighlightEr
 }
 
 pub fn languages() -> Vec<&'static str> {
-    Language::iter()
-        .map(|language| language.id_name())
-        .collect()
+    Language::iter().map(|language| language.id_name()).collect()
 }
 
 #[cfg(feature = "themes")]
@@ -213,11 +177,7 @@ fn style_to_css(style: &Style) -> String {
 }
 
 #[cfg(feature = "themes")]
-pub fn theme_css(
-    theme: &str,
-    selector: Option<&str>,
-    class_prefix: &str,
-) -> Result<String, HighlightError> {
+pub fn theme_css(theme: &str, selector: Option<&str>, class_prefix: &str) -> Result<String, HighlightError> {
     let theme = lumis_themes::get(theme).map_err(|e| HighlightError::Theme(e.to_string()))?;
     let mut out = String::with_capacity(4096);
     for (scope, style) in &theme.highlights {
@@ -238,11 +198,7 @@ pub fn theme_css(
 }
 
 #[cfg(not(feature = "themes"))]
-pub fn theme_css(
-    _theme: &str,
-    _selector: Option<&str>,
-    _class_prefix: &str,
-) -> Result<String, HighlightError> {
+pub fn theme_css(_theme: &str, _selector: Option<&str>, _class_prefix: &str) -> Result<String, HighlightError> {
     Err(HighlightError::Theme("themes feature is disabled".into()))
 }
 
@@ -263,28 +219,12 @@ pub fn theme_colors(theme: &str) -> Result<ThemeColors, HighlightError> {
                 lumis_themes::UnderlineStyle::Dotted => Some("dotted"),
                 lumis_themes::UnderlineStyle::Dashed => Some("dashed"),
             };
-            (
-                scope.clone(),
-                style.fg.clone(),
-                style.bg.clone(),
-                style.bold,
-                style.italic,
-                underline,
-                style.text_decoration.strikethrough,
-            )
+            (scope.clone(), style.fg.clone(), style.bg.clone(), style.bold, style.italic, underline, style.text_decoration.strikethrough)
         })
         .collect())
 }
 
-pub type ThemeColors = Vec<(
-    String,
-    Option<String>,
-    Option<String>,
-    bool,
-    bool,
-    Option<&'static str>,
-    bool,
-)>;
+pub type ThemeColors = Vec<(String, Option<String>, Option<String>, bool, bool, Option<&'static str>, bool)>;
 
 #[cfg(not(feature = "themes"))]
 pub fn theme_colors(_theme: &str) -> Result<ThemeColors, HighlightError> {
@@ -292,9 +232,7 @@ pub fn theme_colors(_theme: &str) -> Result<ThemeColors, HighlightError> {
 }
 
 pub fn themes() -> Vec<&'static str> {
-    let mut names: Vec<_> = lumis_themes::available_themes()
-        .map(|theme| theme.name.as_str())
-        .collect();
+    let mut names: Vec<_> = lumis_themes::available_themes().map(|theme| theme.name.as_str()).collect();
     names.sort_unstable();
     names
 }

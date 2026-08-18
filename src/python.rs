@@ -6,10 +6,7 @@ use pyo3::types::PyDict;
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
-use crate::{
-    HighlightError, guess, highlight_component, highlight_spans, languages, theme_colors,
-    theme_css, themes, tokenize,
-};
+use crate::{HighlightError, guess, highlight_component, highlight_spans, languages, theme_colors, theme_css, themes, tokenize};
 
 fn py_err(err: HighlightError) -> PyErr {
     PyValueError::new_err(err.to_string())
@@ -19,21 +16,14 @@ fn py_err(err: HighlightError) -> PyErr {
 /// `RuntimeError` instead of surfacing pyo3's `BaseException`-derived
 /// `PanicException`.
 fn guard<T>(what: &str, f: impl FnOnce() -> T) -> PyResult<T> {
-    catch_unwind(AssertUnwindSafe(f)).map_err(|_| {
-        PyRuntimeError::new_err(format!(
-            "internal error in fastpylight while {what} (this is a bug, please report it)"
-        ))
-    })
+    catch_unwind(AssertUnwindSafe(f))
+        .map_err(|_| PyRuntimeError::new_err(format!("internal error in fastpylight while {what} (this is a bug, please report it)")))
 }
 
 #[pyfunction(name = "tokenize")]
 fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
     guard("tokenizing", || tokenize(code, lang))?
-        .map(|toks| {
-            toks.into_iter()
-                .map(|tok| (tok.start, tok.end, tok.kind))
-                .collect()
-        })
+        .map(|toks| toks.into_iter().map(|tok| (tok.start, tok.end, tok.kind)).collect())
         .map_err(py_err)
 }
 
@@ -62,11 +52,7 @@ fn py_guess(code: &str, lang: Option<&str>) -> PyResult<&'static str> {
 
 #[pyfunction(name = "theme_css")]
 #[pyo3(signature = (theme, selector=None, class_prefix=None))]
-fn py_theme_css(
-    theme: &str,
-    selector: Option<&str>,
-    class_prefix: Option<&str>,
-) -> PyResult<String> {
+fn py_theme_css(theme: &str, selector: Option<&str>, class_prefix: Option<&str>) -> PyResult<String> {
     let cp = class_prefix.unwrap_or("");
     guard("building theme css", || theme_css(theme, selector, cp))?.map_err(py_err)
 }
