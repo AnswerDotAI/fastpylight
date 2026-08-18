@@ -22,9 +22,7 @@ fn guard<T>(what: &str, f: impl FnOnce() -> T) -> PyResult<T> {
 
 #[pyfunction(name = "tokenize")]
 fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> {
-    guard("tokenizing", || tokenize(code, lang))?
-        .map(|toks| toks.into_iter().map(|tok| (tok.start, tok.end, tok.kind)).collect())
-        .map_err(py_err)
+    guard("tokenizing", || tokenize(code, lang))?.map(|toks| toks.into_iter().map(|tok| (tok.start, tok.end, tok.kind)).collect()).map_err(py_err)
 }
 
 #[pyfunction(name = "highlight")]
