@@ -38,3 +38,6 @@ thiserror = "2"
 
 [lints.clippy]
 too_many_arguments = "allow"
+
+[profile.release]
+strip = true
