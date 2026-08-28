@@ -8,9 +8,7 @@ use std::panic::{AssertUnwindSafe, catch_unwind};
 
 use crate::{HighlightError, guess, highlight_component, highlight_spans, languages, theme_colors, theme_css, themes, tokenize};
 
-fn py_err(err: HighlightError) -> PyErr {
-    PyValueError::new_err(err.to_string())
-}
+fn py_err(err: HighlightError) -> PyErr { PyValueError::new_err(err.to_string()) }
 
 /// Run a panic-prone pure-Rust step, converting any panic into a clean
 /// `RuntimeError` instead of surfacing pyo3's `BaseException`-derived
@@ -26,9 +24,7 @@ fn py_tokenize(code: &str, lang: &str) -> PyResult<Vec<(usize, usize, String)>> 
 }
 
 #[pyfunction(name = "highlight")]
-fn py_highlight(code: &str, lang: &str) -> PyResult<String> {
-    guard("highlighting", || highlight_component(code, lang))?.map_err(py_err)
-}
+fn py_highlight(code: &str, lang: &str) -> PyResult<String> { guard("highlighting", || highlight_component(code, lang))?.map_err(py_err) }
 
 #[pyfunction(name = "highlight_spans")]
 #[pyo3(signature = (code, lang, class_prefix=None))]
@@ -38,20 +34,16 @@ fn py_highlight_spans(code: &str, lang: &str, class_prefix: Option<&str>) -> PyR
 }
 
 #[pyfunction(name = "languages")]
-fn py_languages() -> Vec<&'static str> {
-    languages()
-}
+fn py_languages() -> Vec<&'static str> { languages() }
 
 #[pyfunction(name = "guess")]
 #[pyo3(signature = (code, lang=None))]
-fn py_guess(code: &str, lang: Option<&str>) -> PyResult<&'static str> {
-    guard("guessing language", || guess(lang, code))
-}
+fn py_guess(code: &str, lang: Option<&str>) -> PyResult<&'static str> { guard("guessing language", || guess(lang, code)) }
 
 #[pyfunction(name = "theme_css")]
 #[pyo3(signature = (theme, selector=None, class_prefix=None))]
 fn py_theme_css(theme: &str, selector: Option<&str>, class_prefix: Option<&str>) -> PyResult<String> {
-    let cp = class_prefix.unwrap_or("");
+    let cp = class_prefix.unwrap_or("hl-");
     guard("building theme css", || theme_css(theme, selector, cp))?.map_err(py_err)
 }
 
@@ -73,9 +65,7 @@ fn py_theme_colors(py: Python<'_>, theme: &str) -> PyResult<Py<PyDict>> {
 }
 
 #[pyfunction(name = "themes")]
-fn py_themes() -> Vec<&'static str> {
-    themes()
-}
+fn py_themes() -> Vec<&'static str> { themes() }
 
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {

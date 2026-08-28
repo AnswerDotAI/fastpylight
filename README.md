@@ -17,10 +17,10 @@ code = "def f(x):\n    return x + 1\n"
 html = highlight(code, "python")
 
 # Static span output.
-spans = highlight_spans(code, "python", "hl-")
+spans = highlight_spans(code, "python")
 
 # CSS rules for the span output.
-css = theme_css("github_light", "pre code", "hl-")
+css = theme_css("github_light", "pre code")
 ```
 
 `highlight` returns HTML with token ranges in UTF-16 code units, for use with the CSS Highlight API:
@@ -101,7 +101,7 @@ You can generate CSS at runtime:
 
 ```py
 highlight_css = theme_css("github_light")
-span_css = theme_css("github_light", "pre code", "hl-")
+span_css = theme_css("github_light", "pre code")
 ```
 
 For non-CSS consumers (e.g. document converters), `theme_colors("github_light")` returns the same theme as data: a dict of dotted scope names (including `normal`, which the CSS omits) to `{'fg', 'bg', 'bold', 'italic', 'underline', 'strikethrough'}`.

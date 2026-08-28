@@ -9,11 +9,7 @@ use lumis::themes::Style;
 mod python;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Token {
-    pub start: usize,
-    pub end: usize,
-    pub kind: String,
-}
+pub struct Token { pub start: usize, pub end: usize, pub kind: String }
 
 #[derive(Debug, Error)]
 pub enum HighlightError {
@@ -28,15 +24,11 @@ pub enum HighlightError {
 fn parse_lang(lang: &str) -> Result<Language, HighlightError> {
     // `PlainText` has no `FromStr` alias in lumis, so its `id_name` can't be
     // parsed; special-case it so the requested-language path can select it.
-    if lang.eq_ignore_ascii_case(Language::PlainText.id_name()) {
-        return Ok(Language::PlainText);
-    }
+    if lang.eq_ignore_ascii_case(Language::PlainText.id_name()) { return Ok(Language::PlainText); }
     lang.parse::<Language>().map_err(|_| HighlightError::UnknownLanguage(lang.to_string()))
 }
 
-pub fn guess(lang: Option<&str>, code: &str) -> &'static str {
-    Language::guess(lang, code).id_name()
-}
+pub fn guess(lang: Option<&str>, code: &str) -> &'static str { Language::guess(lang, code).id_name() }
 
 pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
     let language = parse_lang(lang)?;
@@ -48,9 +40,7 @@ pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
         // embedded language; markdown's own structure keeps its scopes.
         let foreign = host_md && !matches!(tok_lang, Language::Markdown | Language::MarkdownInline);
         let scope = if foreign { "markup.raw.block" } else { scope };
-        if scope.is_empty() {
-            return Ok(());
-        }
+        if scope.is_empty() { return Ok(()); }
         if host_md
             && let Some(last) = toks.last_mut()
             && last.kind == scope
@@ -79,9 +69,7 @@ fn html_escape(s: &str, out: &mut String) {
     }
 }
 
-fn class_name(kind: &str, class_prefix: &str) -> String {
-    format!("{class_prefix}{}", kind.replace('.', "-"))
-}
+fn class_name(kind: &str, class_prefix: &str) -> String { format!("{class_prefix}{}", kind.replace('.', "-")) }
 
 fn push_escaped_slice(code: &str, start: usize, end: usize, out: &mut String) -> Result<(), HighlightError> {
     match code.get(start..end) {
@@ -97,15 +85,11 @@ pub fn write_highlighted_inner(code: &str, lang: &str, class_prefix: &str, out: 
     let toks = tokenize(code, lang)?;
     let mut pos = 0usize;
     for tok in &toks {
-        if tok.end == tok.start {
-            continue;
-        }
+        if tok.end == tok.start { continue; }
         if tok.start < pos || tok.end < tok.start || tok.end > code.len() {
             return Err(HighlightError::Highlight(format!("invalid token range: {}..{}", tok.start, tok.end)));
         }
-        if pos < tok.start {
-            push_escaped_slice(code, pos, tok.start, out)?;
-        }
+        if pos < tok.start { push_escaped_slice(code, pos, tok.start, out)?; }
         out.push_str("<span class=\"");
         out.push_str(&class_name(&tok.kind, class_prefix));
         out.push_str("\">");
@@ -113,9 +97,7 @@ pub fn write_highlighted_inner(code: &str, lang: &str, class_prefix: &str, out: 
         out.push_str("</span>");
         pos = tok.end;
     }
-    if pos < code.len() {
-        push_escaped_slice(code, pos, code.len(), out)?;
-    }
+    if pos < code.len() { push_escaped_slice(code, pos, code.len(), out)?; }
     Ok(())
 }
 
@@ -150,9 +132,7 @@ pub fn highlight_component(code: &str, lang: &str) -> Result<String, HighlightEr
     let b2c = byte_to_utf16_table(code);
     let mut toks_json = String::from("[");
     for (i, tok) in toks.iter().enumerate() {
-        if i > 0 {
-            toks_json.push(',');
-        }
+        if i > 0 { toks_json.push(','); }
         let cs = b2c[tok.start];
         let ce = b2c[tok.end];
         toks_json.push_str(&format!("[{cs},{ce},\"{}\"]", tok.kind.replace('.', "-")));
@@ -167,27 +147,19 @@ pub fn highlight_component(code: &str, lang: &str) -> Result<String, HighlightEr
     Ok(out)
 }
 
-pub fn languages() -> Vec<&'static str> {
-    Language::iter().map(|language| language.id_name()).collect()
-}
+pub fn languages() -> Vec<&'static str> { Language::iter().map(|language| language.id_name()).collect() }
 
 #[cfg(feature = "themes")]
-fn style_to_css(style: &Style) -> String {
-    style.css(true, " ")
-}
+fn style_to_css(style: &Style) -> String { style.css(true, " ") }
 
 #[cfg(feature = "themes")]
 pub fn theme_css(theme: &str, selector: Option<&str>, class_prefix: &str) -> Result<String, HighlightError> {
     let theme = lumis_themes::get(theme).map_err(|e| HighlightError::Theme(e.to_string()))?;
     let mut out = String::with_capacity(4096);
     for (scope, style) in &theme.highlights {
-        if scope == "normal" {
-            continue;
-        }
+        if scope == "normal" { continue; }
         let css = style_to_css(style);
-        if css.is_empty() {
-            continue;
-        }
+        if css.is_empty() { continue; }
         let scope = scope.replace('.', "-");
         match selector {
             Some(sel) => out.push_str(&format!("{sel} .{class_prefix}{scope} {{ {css} }}\n")),
@@ -227,9 +199,7 @@ pub fn theme_colors(theme: &str) -> Result<ThemeColors, HighlightError> {
 pub type ThemeColors = Vec<(String, Option<String>, Option<String>, bool, bool, Option<&'static str>, bool)>;
 
 #[cfg(not(feature = "themes"))]
-pub fn theme_colors(_theme: &str) -> Result<ThemeColors, HighlightError> {
-    Err(HighlightError::Theme("themes feature is disabled".into()))
-}
+pub fn theme_colors(_theme: &str) -> Result<ThemeColors, HighlightError> { Err(HighlightError::Theme("themes feature is disabled".into())) }
 
 pub fn themes() -> Vec<&'static str> {
     let mut names: Vec<_> = lumis_themes::available_themes().map(|theme| theme.name.as_str()).collect();

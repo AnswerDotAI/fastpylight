@@ -28,6 +28,7 @@ def test_highlight_spans():
 def test_theme_css_class_prefix():
     css = theme_css("github_light", "pre code", "hl-")
     assert "pre code .hl-" in css
+    assert "pre code .hl-" in theme_css("github_light", "pre code")  # default prefix matches highlight_spans'
 
 def test_theme_css_highlight_selectors():
     css = theme_css("github_light")
