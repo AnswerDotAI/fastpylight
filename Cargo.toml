@@ -1,17 +1,22 @@
-[package]
-name = "fastpylight"
+[workspace]
+members = ["py"]
+default-members = [".", "py"]
+
+[workspace.package]
 version = "0.1.19"
 edition = "2024"
+
+[package]
+name = "fastpylight"
+version.workspace = true
+edition.workspace = true
 rust-version = "1.91"
 
 [lib]
 name = "fastpylight"
-crate-type = ["rlib", "cdylib"]
 
 [features]
 default = ["standard-languages", "themes"]
-python = ["dep:pyo3"]
-extension-module = ["python", "pyo3/extension-module"]
 standard-languages = [
     "lumis/lang-bundle-web",
     "lumis/lang-bundle-web-extra",
@@ -32,18 +37,23 @@ all-languages = ["lumis/all-languages"]
 themes = []
 
 [dependencies]
-pyo3 = { version = ">=0.28", optional = true }
 lumis = { version = "0.12", default-features = false }
 thiserror = "2"
 
 [lints.clippy]
 too_many_arguments = "allow"
 
+[profile.test]
+inherits = "release"
+
 [profile.release]
 lto = false
 codegen-units = 16
 
 [profile.release.package.fastpylight]
+incremental = true
+
+[profile.release.package.fastpylight-py]
 incremental = true
 
 [profile.dist]
@@ -54,4 +64,7 @@ codegen-units = 1
 strip = true
 
 [profile.dist.package.fastpylight]
+incremental = false
+
+[profile.dist.package.fastpylight-py]
 incremental = false

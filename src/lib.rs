@@ -5,8 +5,6 @@ use thiserror::Error;
 
 #[cfg(feature = "themes")]
 use lumis::themes::Style;
-#[cfg(feature = "python")]
-mod python;
 
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Token { pub start: usize, pub end: usize, pub kind: String }

@@ -6,7 +6,7 @@ use pyo3::types::PyDict;
 
 use std::panic::{AssertUnwindSafe, catch_unwind};
 
-use crate::{HighlightError, guess, highlight_component, highlight_spans, languages, theme_colors, theme_css, themes, tokenize};
+use fastpylight::{HighlightError, guess, highlight_component, highlight_spans, languages, theme_colors, theme_css, themes, tokenize};
 
 fn py_err(err: HighlightError) -> PyErr { PyValueError::new_err(err.to_string()) }
 
