@@ -11,12 +11,8 @@ pub struct Token { pub start: usize, pub end: usize, pub kind: String }
 
 #[derive(Debug, Error)]
 pub enum HighlightError {
-    #[error("unknown language: {0}")]
-    UnknownLanguage(String),
-    #[error("highlight error: {0}")]
-    Highlight(String),
-    #[error("theme parse error: {0}")]
-    Theme(String),
+    #[error("unknown language: {0}")] UnknownLanguage(String), #[error("highlight error: {0}")] Highlight(String), #[error("theme parse error: {0}")]
+    Theme(String)
 }
 
 fn parse_lang(lang: &str) -> Result<Language, HighlightError> {
@@ -39,31 +35,17 @@ pub fn tokenize(code: &str, lang: &str) -> Result<Vec<Token>, HighlightError> {
         let foreign = host_md && !matches!(tok_lang, Language::Markdown | Language::MarkdownInline);
         let scope = if foreign { "markup.raw.block" } else { scope };
         if scope.is_empty() { return Ok(()); }
-        if host_md
-            && let Some(last) = toks.last_mut()
-            && last.kind == scope
-            && last.end >= range.start
-        {
-            last.end = last.end.max(range.end);
-            return Ok(());
-        }
+        if host_md && let Some(last) = toks.last_mut() && last.kind == scope && last.end >= range.start { last.end = last.end.max(range.end); return Ok(()); }
         toks.push(Token { start: range.start, end: range.end, kind: scope.to_string() });
         Ok(())
-    })
-    .map_err(|e| HighlightError::Highlight(e.to_string()))?;
+    }).map_err(|e| HighlightError::Highlight(e.to_string()))?;
     toks.sort_by_key(|tok| (tok.start, tok.end));
     Ok(toks)
 }
 
 fn html_escape(s: &str, out: &mut String) {
     for c in s.chars() {
-        match c {
-            '<' => out.push_str("&lt;"),
-            '>' => out.push_str("&gt;"),
-            '&' => out.push_str("&amp;"),
-            '"' => out.push_str("&quot;"),
-            _ => out.push(c),
-        }
+        match c { '<' => out.push_str("&lt;"), '>' => out.push_str("&gt;"), '&' => out.push_str("&amp;"), '"' => out.push_str("&quot;"), _ => out.push(c) }
     }
 }
 
@@ -71,11 +53,7 @@ fn class_name(kind: &str, class_prefix: &str) -> String { format!("{class_prefix
 
 fn push_escaped_slice(code: &str, start: usize, end: usize, out: &mut String) -> Result<(), HighlightError> {
     match code.get(start..end) {
-        Some(s) => {
-            html_escape(s, out);
-            Ok(())
-        }
-        None => Err(HighlightError::Highlight(format!("invalid UTF-8 token range: {start}..{end}"))),
+        Some(s) => { html_escape(s, out); Ok(()) } None => Err(HighlightError::Highlight(format!("invalid UTF-8 token range: {start}..{end}")))
     }
 }
 
@@ -177,21 +155,14 @@ pub fn theme_css(_theme: &str, _selector: Option<&str>, _class_prefix: &str) -> 
 #[cfg(feature = "themes")]
 pub fn theme_colors(theme: &str) -> Result<ThemeColors, HighlightError> {
     let theme = lumis_themes::get(theme).map_err(|e| HighlightError::Theme(e.to_string()))?;
-    Ok(theme
-        .highlights
-        .iter()
-        .map(|(scope, style)| {
-            let underline = match style.text_decoration.underline {
-                lumis_themes::UnderlineStyle::None => None,
-                lumis_themes::UnderlineStyle::Solid => Some("solid"),
-                lumis_themes::UnderlineStyle::Wavy => Some("wavy"),
-                lumis_themes::UnderlineStyle::Double => Some("double"),
-                lumis_themes::UnderlineStyle::Dotted => Some("dotted"),
-                lumis_themes::UnderlineStyle::Dashed => Some("dashed"),
-            };
-            (scope.clone(), style.fg.clone(), style.bg.clone(), style.bold, style.italic, underline, style.text_decoration.strikethrough)
-        })
-        .collect())
+    Ok(theme.highlights.iter().map(|(scope, style)| {
+        let underline = match style.text_decoration.underline {
+            lumis_themes::UnderlineStyle::None => None, lumis_themes::UnderlineStyle::Solid => Some("solid"),
+            lumis_themes::UnderlineStyle::Wavy => Some("wavy"), lumis_themes::UnderlineStyle::Double => Some("double"),
+            lumis_themes::UnderlineStyle::Dotted => Some("dotted"), lumis_themes::UnderlineStyle::Dashed => Some("dashed")
+        };
+        (scope.clone(), style.fg.clone(), style.bg.clone(), style.bold, style.italic, underline, style.text_decoration.strikethrough)
+    }).collect())
 }
 
 pub type ThemeColors = Vec<(String, Option<String>, Option<String>, bool, bool, Option<&'static str>, bool)>;
