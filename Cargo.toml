@@ -14,6 +14,7 @@ rust-version = "1.91"
 
 [lib]
 name = "fastpylight"
+test = false
 
 [features]
 default = ["standard-languages", "themes"]
