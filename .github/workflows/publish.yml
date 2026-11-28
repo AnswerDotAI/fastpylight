@@ -15,13 +15,13 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
-      - uses: AnswerDotAI/.github/actions/sccache@main
+      - uses: AnswerDotAI/workflows/sccache@master
         with:
           r2-url: ${{ secrets.SCCACHE_R2 }}
       - uses: actions/setup-python@v7
         with:
           python-version: '3.13'
-      - uses: AnswerDotAI/.github/actions/maturin-build@main
+      - uses: AnswerDotAI/workflows/maturin-build@master
         with:
           args: --profile dist --out dist ${{ runner.os == 'Linux' && '--zig' || '' }}
           manylinux: '2_31'
@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: AnswerDotAI/.github/actions/maturin-build@main
+      - uses: AnswerDotAI/workflows/maturin-build@master
         with:
           command: sdist
           args: --out dist
@@ -61,7 +61,7 @@ jobs:
       - uses: actions/attest-build-provenance@v4
         with:
           subject-path: 'dist/*'
-      - uses: AnswerDotAI/.github/actions/setup-uv@main
+      - uses: AnswerDotAI/workflows/setup-uv@master
       - run: uv publish 'dist/*'
       - uses: softprops/action-gh-release@v3
         with:

@@ -7,7 +7,7 @@ name = "fastpylight"
 dynamic = ["version"]
 description = "Fast syntax highlighting using Lumis and Tree-sitter"
 license = "Apache-2.0"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 readme = "README.md"
 authors = [{name = "Curtis Allan", email = "ca@answer.ai"}]
 maintainers = [{name = "fast.ai", email = "infos@fast.ai"}]
@@ -24,6 +24,7 @@ Homepage = "https://github.com/AnswerDotAI/fastpylight"
 Repository = "https://github.com/AnswerDotAI/fastpylight"
 Issues = "https://github.com/AnswerDotAI/fastpylight/issues"
 
+Documentation = "https://AnswerDotAI.github.io/fastpylight/"
 [project.entry-points.fastaudit_safe_native]
 fastpylight = "fastpylight"
 
